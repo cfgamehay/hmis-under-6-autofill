@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title>HMIS · Khám sức khỏe trẻ dưới 6 tuổi</title>
+  <link rel="stylesheet" href="site.css">
+</head>
+<body>
+  <main class="shell">
+    <section id="gate" class="card gate" aria-labelledby="gate-title">
+      <div class="brand-mark" aria-hidden="true">TB</div>
+      <p class="eyebrow">Công cụ nội bộ</p>
+      <h1 id="gate-title">HMIS · Khám sức khỏe trẻ dưới 6 tuổi</h1>
+      <p class="muted">Nhập mật khẩu được cung cấp để xem thông tin và tải extension.</p>
+      <form id="login-form" autocomplete="off">
+        <label for="password">Mật khẩu truy cập</label>
+        <div class="password-row">
+          <input id="password" type="password" autocomplete="current-password" required autofocus>
+          <button type="submit">Mở trang</button>
+        </div>
+        <p id="login-error" class="error" role="alert" hidden>Mật khẩu không đúng.</p>
+      </form>
+      <p class="security-note">Lưu ý: đây là lớp khóa phía trình duyệt dành cho chia sẻ nội bộ, không thay thế cơ chế xác thực máy chủ.</p>
+    </section>
+
+    <section id="content" class="content" hidden>
+      <header class="hero card">
+        <div>
+          <p class="eyebrow">Bản phát hành nội bộ</p>
+          <h1>HMIS · Khám sức khỏe trẻ dưới 6 tuổi</h1>
+          <p class="lead">Extension hỗ trợ nhập liệu Tiếp nhận, mở phiếu KSK, lưu, ký số và chuẩn bị hồ sơ tiếp theo theo quy trình nối tiếp.</p>
+        </div>
+        <span class="version">v3.21.8</span>
+      </header>
+
+      <section class="grid">
+        <article class="card feature">
+          <h2>Quy trình tự động</h2>
+          <ul>
+            <li>Điền form Tiếp nhận và kiểm tra hồ sơ trùng.</li>
+            <li>Mở phiếu khám sức khỏe dưới 6 tuổi theo đúng ID.</li>
+            <li>Điền phiếu, lưu và hoàn thành ký số.</li>
+            <li>Cho phép chuẩn bị người tiếp theo trong khi vòng hiện tại đang chạy.</li>
+          </ul>
+        </article>
+        <article class="card feature">
+          <h2>Điểm nổi bật</h2>
+          <ul>
+            <li>Khóa tiến trình theo đúng tab HMIS khởi chạy.</li>
+            <li>Phím tắt Auto hoàn toàn có thể cấu hình.</li>
+            <li>Dân tộc lấy trực tiếp từ danh mục HMIS.</li>
+            <li>Dữ liệu người kế tiếp không ghi đè vòng Auto đang chạy.</li>
+          </ul>
+        </article>
+      </section>
+
+      <section class="card download-card">
+        <div>
+          <p class="eyebrow">Gói cài đặt</p>
+          <h2>Extension HMIS v3.21.8</h2>
+          <p class="muted">Tải file ZIP, giải nén, sau đó chọn “Load unpacked” trong trang quản lý extension của Brave/Chrome.</p>
+        </div>
+        <a class="download" href="hmis-under-6-autofill-v3.21.8.zip" download>Tải extension (.zip)</a>
+      </section>
+
+      <section class="card install">
+        <h2>Hướng dẫn cài đặt</h2>
+        <ol>
+          <li>Tải và giải nén file ZIP vào một thư mục cố định.</li>
+          <li>Mở <code>brave://extensions</code> hoặc <code>chrome://extensions</code>.</li>
+          <li>Bật <strong>Developer mode</strong>.</li>
+          <li>Chọn <strong>Load unpacked</strong> và trỏ tới thư mục vừa giải nén.</li>
+          <li>Tải lại các tab HMIS đang mở.</li>
+        </ol>
+      </section>
+
+      <footer>Chỉ sử dụng trong môi trường được đơn vị cho phép. Không đưa dữ liệu bệnh nhân lên GitHub.</footer>
+    </section>
+  </main>
+  <script src="site.js"></script>
+</body>
+</html>
+

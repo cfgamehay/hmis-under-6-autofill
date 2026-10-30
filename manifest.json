@@ -1,0 +1,43 @@
+{
+  "manifest_version": 3,
+  "name": "Khám sức khỏe trẻ dưới 6 tuổi",
+  "description": "Cửa sổ nổi nhập liệu tiếp nhận và khám sức khỏe trẻ dưới 6 tuổi.",
+  "version": "3.21.8",
+  "permissions": [
+    "activeTab",
+    "storage"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_title": "Ẩn/hiện nhập liệu khám sức khỏe"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": ["popup.html", "popup.css", "popup.js"],
+      "matches": ["https://ytcs.hmis.vn/*"]
+    }
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "https://ytcs.hmis.vn/*"
+      ],
+      "js": [
+        "main-world-router.js"
+      ],
+      "run_at": "document_start",
+      "world": "MAIN"
+    },
+    {
+      "matches": [
+        "https://ytcs.hmis.vn/*"
+      ],
+      "js": [
+        "content-script.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ]
+}

@@ -1,0 +1,301 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Khám sức khỏe trẻ dưới 6 tuổi</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <button id="toggleActions" class="panel-toggle" type="button" title="Ẩn extension" aria-label="Ẩn extension">›</button>
+  <div id="existingPatientWidget" class="existing-patient-widget">
+    <button id="existingPatientIndicator" class="existing-patient-indicator is-idle" type="button" title="Nhập đủ Tên, Ngày sinh và Giới tính để kiểm tra" aria-label="Trạng thái kiểm tra bệnh nhân">Chưa kiểm tra</button>
+    <div id="existingPatientToast" class="existing-patient-toast" role="status" aria-live="polite" hidden></div>
+  </div>
+  <main>
+    <header>
+      <div>
+        <h1>Khám sức khỏe trẻ dưới 6 tuổi</h1>
+        <p>Cửa sổ nổi — không làm thay đổi bố cục website</p>
+      </div>
+      <span class="version">v3.21.8</span>
+    </header>
+    <button id="returnToReception" class="return-reception" type="button">← Quay về form nhập</button>
+
+    <section class="sticky-actions" aria-label="Thao tác nhập liệu">
+      <button id="toggleConfig" class="config-toggle" type="button" aria-expanded="true" aria-controls="workflowOptions">Ẩn tùy chọn cấu hình ▲</button>
+      <div id="workflowOptions" class="workflow-options">
+        <section class="workflow-config-group" aria-labelledby="config-auto-title">
+          <h3 id="config-auto-title">Tự động hóa</h3>
+          <label class="workflow-switch">
+            <span>Ghi đè dữ liệu</span>
+            <span class="switch-wrap"><input id="overwrite" type="checkbox"><span class="switch-slider"></span><span class="switch-value"></span></span>
+          </label>
+          <label class="workflow-switch">
+            <span>Sau lưu: tìm Mã BN và mở KSK</span>
+            <span class="switch-wrap"><input id="autoOpenHealthAfterSave" type="checkbox"><span class="switch-slider"></span><span class="switch-value"></span></span>
+          </label>
+          <label class="workflow-text">
+            <span>Lý do vào viện — tự động nhập</span>
+            <input id="admissionReason" type="text" autocomplete="off" placeholder="Ví dụ: Khám sức khỏe">
+          </label>
+          <label class="workflow-delay">
+            <span>Autofill: hiển thị mỗi ô (giây)</span>
+            <input id="fieldDelaySeconds" type="number" min="0.1" max="5" step="0.05" inputmode="decimal" value="0.25">
+          </label>
+          <label class="workflow-hotkey">
+            <span>Phím tắt chạy Auto hoàn toàn</span>
+            <input id="fullAutoHotkey" type="text" autocomplete="off" spellcheck="false" readonly placeholder="Bấm tổ hợp phím" aria-label="Phím tắt chạy Auto hoàn toàn">
+            <small>Bấm vào ô rồi nhấn tổ hợp phím. Backspace/Delete để xóa.</small>
+          </label>
+        </section>
+
+        <section class="workflow-config-group" aria-labelledby="config-check-title">
+          <h3 id="config-check-title">CCCD và kiểm tra trùng</h3>
+          <label class="workflow-switch">
+            <span>Tự chọn giới tính theo CCCD</span>
+            <span class="switch-wrap"><input id="autoGenderFromIdentity" type="checkbox"><span class="switch-slider"></span><span class="switch-value"></span></span>
+          </label>
+          <label class="workflow-switch">
+            <span>Tự lấy năm sinh từ CCCD (2|21 → 2021)</span>
+            <span class="switch-wrap"><input id="autoBirthYearFromIdentity" type="checkbox"><span class="switch-slider"></span><span class="switch-value"></span></span>
+          </label>
+          <div id="existingPatientCheckOption" class="workflow-check-existing">
+            <label class="workflow-switch">
+              <span>Kiểm tra BN đã tiếp nhận (chỉ form đầu)</span>
+              <span class="switch-wrap"><input id="checkExistingPatient" type="checkbox"><span class="switch-slider"></span><span class="switch-value"></span></span>
+            </label>
+            <div class="workflow-date-range" aria-label="Khoảng ngày kiểm tra bệnh nhân">
+              <label><span>Từ ngày</span><input id="existingPatientFromDate" type="text" inputmode="numeric" maxlength="10" placeholder="d/m/yy hoặc dd/mm/yyyy"></label>
+              <label><span>Đến ngày (hôm nay)</span><input id="existingPatientToDate" type="text" inputmode="numeric" maxlength="10" placeholder="Tự động là ngày hôm nay" readonly></label>
+            </div>
+            <small>Đối chiếu chính xác họ tên, ngày sinh và giới tính qua API HMIS trước khi điền form Tiếp nhận.</small>
+          </div>
+        </section>
+
+        <section class="workflow-config-group" aria-labelledby="config-entry-title">
+          <h3 id="config-entry-title">Điều hướng nhập liệu</h3>
+          <label class="workflow-switch">
+            <span>Nhập dữ liệu: tự chuyển ô</span>
+            <span class="switch-wrap"><input id="autoAdvanceDataEntry" type="checkbox"><span class="switch-slider"></span><span class="switch-value"></span></span>
+          </label>
+          <label class="workflow-switch">
+            <span>Đủ số ký tự cố định: tự chuyển ô</span>
+            <span class="switch-wrap"><input id="autoAdvanceFixedLength" type="checkbox"><span class="switch-slider"></span><span class="switch-value"></span></span>
+          </label>
+          <label class="workflow-delay">
+            <span>Nhập dữ liệu: chờ chuyển ô (giây)</span>
+            <input id="dataEntryAdvanceSeconds" type="number" min="0.5" max="5" step="0.1" inputmode="decimal" value="1.5">
+          </label>
+          <label class="workflow-delay">
+            <span>SĐT → CCCD người giám hộ: chờ (giây)</span>
+            <input id="phoneToIdentityDelaySeconds" type="number" min="0.2" max="10" step="0.1" inputmode="decimal" value="2">
+          </label>
+        </section>
+
+        <section class="workflow-config-group" aria-labelledby="config-address-title">
+          <h3 id="config-address-title">Địa chỉ</h3>
+          <label class="workflow-delay">
+            <span>Tỉnh/Xã thường dùng: số lựa chọn</span>
+            <input id="frequentLocationLimit" type="number" min="1" max="10" step="1" inputmode="numeric" value="5">
+          </label>
+          <label class="workflow-switch">
+            <span>Viết hoa đầu từng từ địa chỉ</span>
+            <span class="switch-wrap"><input id="capitalizeAddress" type="checkbox"><span class="switch-slider"></span><span class="switch-value"></span></span>
+          </label>
+          <label class="workflow-text workflow-address-rules">
+            <span>Viết hoa / mở rộng từ viết tắt địa chỉ</span>
+            <textarea id="addressUppercaseRules" rows="2" autocomplete="off" spellcheck="false" placeholder="Ví dụ: cc > CC hoặc kp > khu phố"></textarea>
+            <small>Mỗi dòng một quy tắc. Có thể dùng =, &gt; hoặc -&gt;. Khi “kp” thành “khu phố”, con trỏ sẽ nằm đúng ở cuối nội dung mới.</small>
+          </label>
+        </section>
+
+        <section class="workflow-config-group workflow-config-group-last" aria-labelledby="config-ui-title">
+          <h3 id="config-ui-title">Giao diện</h3>
+          <label class="workflow-switch">
+            <span>Hiện hướng dẫn</span>
+            <span class="switch-wrap"><input id="showGuidance" type="checkbox"><span class="switch-slider"></span><span class="switch-value"></span></span>
+          </label>
+          <label class="workflow-font-size">
+            <span>Cỡ chữ giao diện</span>
+            <input id="panelFontSize" type="range" min="12" max="22" step="1" value="14">
+            <output id="panelFontSizeValue" for="panelFontSize">14px</output>
+          </label>
+          <button id="resetPanelSize" class="config-reset-size" type="button">Khôi phục kích thước form</button>
+        </section>
+      </div>
+      <div class="sticky-action-buttons">
+        <button id="fill" class="primary" type="button">Điền toàn bộ</button>
+        <button id="clear" class="secondary" type="button">Làm mới & nhập thông tin</button>
+        <button id="fillFullAuto" class="full-auto" type="button">⚡ Chạy Auto hoàn toàn</button>
+      </div>
+      <div id="status" role="status" aria-live="polite"></div>
+      <div id="dataGuessSuggestion" class="data-guess-suggestion" role="status" aria-live="polite" hidden></div>
+    </section>
+
+    <section class="form-grid">
+      <label class="full compact-name">
+        <span>Họ tên người khám</span>
+        <input id="fullName" type="text" autocomplete="off" placeholder="Họ tên trẻ em/người bệnh">
+      </label>
+
+      <label>
+        <span>Căn cước người khám</span>
+        <input id="identity" type="text" inputmode="numeric" autocomplete="off" placeholder="CCCD người khám">
+      </label>
+
+      <label class="compact-birth">
+        <span>Ngày sinh</span>
+        <input id="birthDate" type="text" inputmode="numeric" autocomplete="off" placeholder="d/m/yy, dd/mm/yyyy hoặc ddmmyyyy">
+      </label>
+
+      <label>
+        <span>Giới tính</span>
+        <select id="gender">
+          <option value="Nam">Nam</option>
+          <option value="Nữ">Nữ</option>
+        </select>
+      </label>
+
+      <label class="quick-switch">
+        <span>Sinh non</span>
+        <span class="switch-wrap"><input id="premature" type="checkbox"><span class="switch-slider"></span><span class="switch-value"></span></span>
+      </label>
+
+      <div class="ethnicity-field full">
+        <label><span>Dân tộc</span><input id="ethnicity" type="text" autocomplete="off" value="Kinh" placeholder="Chọn từ danh mục HMIS" role="combobox" aria-autocomplete="list" aria-controls="ethnicitySuggestions" aria-expanded="false"></label>
+        <div id="ethnicitySuggestions" class="location-suggestions" role="listbox" hidden></div>
+      </div>
+
+      <div class="location-field full">
+        <label>
+          <span>Tỉnh/Xã</span>
+          <input id="location" type="text" autocomplete="off" placeholder="Nhập mã/tên xã – tự đồng bộ gợi ý" role="combobox" aria-autocomplete="list" aria-controls="locationSuggestions" aria-expanded="false">
+        </label>
+        <div id="locationSuggestions" class="location-suggestions" role="listbox" hidden></div>
+        <small>Địa chỉ khóa được chọn toàn bộ ở lần focus đầu tiên; chỉ khi rời ô Tỉnh/Xã, extension mới tự chọn địa chỉ đó trên YTCS.</small>
+      </div>
+
+      <label class="full">
+        <span>Địa chỉ chi tiết</span>
+        <input id="addressDetail" type="text" autocomplete="off" placeholder="Số nhà, đường, tổ/khu phố…">
+        <small>Không điền lại tỉnh/xã ở trường bên cạnh; website tự lấy từ lựa chọn Tỉnh/Xã phía trên.</small>
+      </label>
+
+      <label class="full">
+        <span>Tên người liên hệ/giám hộ</span>
+        <input id="guardianName" type="text" autocomplete="off" placeholder="Họ tên người giám hộ">
+      </label>
+
+      <label>
+        <span>MQH với bệnh nhân</span>
+        <select id="guardianRelationship">
+          <option value="Cha">Cha</option>
+          <option value="Mẹ" selected>Mẹ</option>
+          <option value="Ông/Bà">Ông/Bà</option>
+          <option value="Anh/Chị">Anh/Chị</option>
+          <option value="Họ hàng">Họ hàng (chọn Khác)</option>
+          <option value="Khác">Khác</option>
+        </select>
+        <small>Form tiếp nhận dùng Bố/Mẹ; form khám sẽ check đúng Cha hoặc Mẹ.</small>
+      </label>
+
+      <label>
+        <span>Số điện thoại</span>
+        <input id="contactPhone" type="text" inputmode="tel" autocomplete="off" placeholder="Số điện thoại">
+      </label>
+
+      <label class="full">
+        <span>CCCD người đi cùng trẻ</span>
+        <input id="companionIdentity" type="text" inputmode="numeric" autocomplete="off" placeholder="CCCD người giám hộ">
+      </label>
+
+      <section class="exam-group history-group full" aria-labelledby="history-title">
+        <h2 id="history-title">Tiền sử</h2>
+        <div class="history-row">
+          <label class="quick-switch"><span>Bản thân</span><span class="switch-wrap"><input id="historySelf" type="checkbox"><span class="switch-slider"></span><span class="switch-value"></span></span></label>
+          <label id="historySelfNoteWrap" class="history-note" hidden><span>Ghi chú/Tên bệnh</span><input id="historySelfNote" type="text" autocomplete="off" placeholder="Nhập tiền sử bệnh của trẻ"></label>
+        </div>
+        <div class="history-row">
+          <label class="quick-switch"><span>Gia đình</span><span class="switch-wrap"><input id="historyFamily" type="checkbox"><span class="switch-slider"></span><span class="switch-value"></span></span></label>
+          <label id="historyFamilyNoteWrap" class="history-note" hidden><span>Ghi chú/Tên bệnh</span><input id="historyFamilyNote" type="text" autocomplete="off" placeholder="Nhập tiền sử bệnh gia đình"></label>
+        </div>
+        <div class="history-row">
+          <label class="quick-switch"><span>Tiếp xúc với người bệnh lao</span><span class="switch-wrap"><input id="historyTuberculosis" type="checkbox"><span class="switch-slider"></span><span class="switch-value"></span></span></label>
+        </div>
+      </section>
+
+        <section class="exam-group full" aria-labelledby="vital-title">
+          <h2 id="vital-title">Dấu hiệu sinh tồn</h2>
+          <div class="exam-group-grid three-fields">
+            <label><span>Nhiệt độ (°C)</span><input id="temperature" type="text" inputmode="decimal" autocomplete="off" placeholder="Mặc định 37"></label>
+            <label><span>Mạch (lần/phút)</span><input id="pulse" type="text" inputmode="decimal" autocomplete="off" placeholder="Mặc định 92"></label>
+            <label><span>Nhịp thở (lần/phút)</span><input id="respiratoryRate" type="text" inputmode="decimal" autocomplete="off" placeholder="Mặc định 22"></label>
+          </div>
+        </section>
+        <section class="exam-group full" aria-labelledby="growth-title">
+          <h2 id="growth-title">Chỉ số phát triển</h2>
+          <div class="exam-group-grid">
+            <label><span>Chiều dài (cm)</span><input id="lengthCm" type="text" inputmode="decimal" autocomplete="off" placeholder="Ví dụ 95,5"></label>
+            <label><span>Cân nặng (kg)</span><input id="weightKg" type="text" inputmode="decimal" autocomplete="off" placeholder="Ví dụ 14,5"></label>
+            <label><span>Vòng đầu (cm)</span><input id="headCircumferenceCm" type="text" inputmode="decimal" autocomplete="off" placeholder="Mặc định 50 (khoảng 49–52)"></label>
+            <label><span>Chu vi vòng cánh tay (mm)</span><input id="armCircumferenceMm" type="text" inputmode="decimal" autocomplete="off" placeholder="12,5 sẽ được đổi thành 125"></label>
+          </div>
+        </section>
+        <section class="exam-group full" aria-labelledby="development-title">
+          <h2 id="development-title">Đánh giá phát triển tinh thần - vận động</h2>
+          <div class="exam-group-grid option-grid">
+            <label class="quick-switch"><span>Có nguy cơ tự kỷ</span><span class="switch-wrap"><input id="autismRisk" type="checkbox"><span class="switch-slider"></span><span class="switch-value"></span></span></label>
+          </div>
+        </section>
+        <section class="exam-group full" aria-labelledby="vaccination-title">
+          <h2 id="vaccination-title">Đánh giá tiêm chủng</h2>
+          <div class="exam-group-grid option-grid">
+            <label class="quick-switch"><span>Tiêm chủng đầy đủ theo độ tuổi</span><span class="switch-wrap"><input id="vaccinationComplete" type="checkbox" checked><span class="switch-slider"></span><span class="switch-value"></span></span></label>
+          </div>
+        </section>
+        <section class="exam-group full" aria-labelledby="nose-title">
+          <h2 id="nose-title" class="select-all-title" role="button" tabindex="0" title="Bấm để chọn hết hoặc tắt hết">Khám mũi</h2>
+          <div class="exam-group-grid option-grid">
+            <label class="quick-switch"><span>Chảy nước mũi</span><span class="switch-wrap"><input id="runnyNose" type="checkbox"><span class="switch-slider"></span><span class="switch-value"></span></span></label>
+            <label class="quick-switch"><span>Nghẹt mũi</span><span class="switch-wrap"><input id="stuffyNose" type="checkbox"><span class="switch-slider"></span><span class="switch-value"></span></span></label>
+          </div>
+        </section>
+        <section class="exam-group full" aria-labelledby="mouth-title">
+          <h2 id="mouth-title" class="select-all-title" role="button" tabindex="0" title="Bấm để chọn hết hoặc tắt hết">Khám miệng, răng</h2>
+          <div class="exam-group-grid option-grid">
+            <label class="quick-switch"><span>Răng sữa sơ sinh</span><span class="switch-wrap"><input id="neonatalTeeth" type="checkbox"><span class="switch-slider"></span><span class="switch-value"></span></span></label>
+            <label class="quick-switch"><span>Vết sâu/mảng bám</span><span class="switch-wrap"><input id="dentalCaries" type="checkbox"><span class="switch-slider"></span><span class="switch-value"></span></span></label>
+          </div>
+        </section>
+        <section class="exam-group full" aria-labelledby="reflex-title">
+          <h2 id="reflex-title" class="select-all-title" role="button" tabindex="0" title="Bấm để chọn hết hoặc tắt hết">Phản xạ</h2>
+          <div class="exam-group-grid option-grid">
+            <label class="quick-switch"><span>Phản xạ nắm</span><span class="switch-wrap"><input id="graspReflex" type="checkbox"><span class="switch-slider"></span><span class="switch-value"></span></span></label>
+            <label class="quick-switch"><span>Phản xạ Moro</span><span class="switch-wrap"><input id="moroReflex" type="checkbox"><span class="switch-slider"></span><span class="switch-value"></span></span></label>
+          </div>
+        </section>
+        <section class="exam-group full" aria-labelledby="conclusion-title">
+          <h2 id="conclusion-title">Kết luận về sức khỏe</h2>
+          <div class="exam-group-grid option-grid">
+            <label class="quick-switch"><span>Có nguy cơ mắc lao (tiền sử tiếp xúc)</span><span class="switch-wrap"><input id="healthConclusionTuberculosisRisk" type="checkbox"><span class="switch-slider"></span><span class="switch-value"></span></span></label>
+            <label class="quick-switch"><span>Có vấn đề về sức khỏe</span><span class="switch-wrap"><input id="healthConclusionProblem" type="checkbox"><span class="switch-slider"></span><span class="switch-value"></span></span></label>
+            <label id="healthConclusionReasonWrap" class="history-note" hidden><span>Lý do/Ghi rõ</span><input id="healthConclusionReason" type="text" autocomplete="off" placeholder="Bắt buộc khi kết luận không bình thường"></label>
+            <small>Không chọn mục nào được hiểu là Bình thường.</small>
+          </div>
+        </section>
+    </section>
+
+    <section class="defaults" aria-label="Giá trị mặc định">
+      <div><span>Đối tượng</span><strong>Miễn phí</strong></div>
+      <div><span>Lý do tiếp nhận</span><strong>Khám bệnh</strong></div>
+      <div><span>Lý do vào viện</span><strong id="admissionReasonPreview">Khám sức khỏe</strong></div>
+      <div><span>Giấy tờ tiếp nhận</span><strong>Định danh công dân</strong></div>
+      <div><span>Yêu cầu khám</span><strong>Trẻ em dưới 6 tuổi</strong></div>
+      <div><span>Phòng khám</span><strong>Option đầu tiên</strong></div>
+    </section>
+
+  </main>
+  <script src="popup.js"></script>
+</body>
+</html>
